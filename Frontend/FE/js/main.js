@@ -224,7 +224,7 @@ async function loadTopDeals(page = 1) {
                 ...b,
                 isDeal: true, // Mark as deal for UI
                 dealStartTime: b.createdAt, // Fallback
-                dealEndTime: new Date(new Date(b.createdAt).getTime() + 1000 * 60 * 60 * 24).getTime(), // Fallback: 24 hours from creation
+                dealEndTime: new Date().getTime() + (1000 * 60 * 60 * 24), // Fallback: 24 hours from NOW for demo
                 dealQuantity: (b.stock || 0) + (b.sold || 0),
                 dealSold: b.sold || 0,
                 maxPerUser: 5
