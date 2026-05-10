@@ -4,8 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start":  "node server.js",
+    "dev":    "node server.js",
+    "seed":   "node seeders/seed.js",
+    "setup":  "node update-db.js && node seeders/seed.js",
+    "test":   "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",

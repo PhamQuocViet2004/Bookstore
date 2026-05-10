@@ -1,0 +1,729 @@
+{
+  "info": {
+    "name": "BookStore API - Full Test Collection",
+    "description": "Toàn bộ API của hệ thống BookStore. Import vào Postman để test.\nBase URL: http://localhost:3001/api",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:3001/api" },
+    { "key": "token_admin", "value": "" },
+    { "key": "token_user", "value": "" },
+    { "key": "book_id", "value": "1" },
+    { "key": "order_id", "value": "1" },
+    { "key": "user_id", "value": "3" }
+  ],
+  "item": [
+    {
+      "name": "1. AUTH - Xác thực",
+      "item": [
+        {
+          "name": "Đăng ký tài khoản",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/register",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Nguyễn Văn Test\",\n  \"email\": \"test@bookstore.vn\",\n  \"phone\": \"0912345678\",\n  \"password\": \"Test@1234\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Đăng nhập - Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var res = pm.response.json();",
+                  "if(res.token) pm.collectionVariables.set('token_admin', res.token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@bookstore.vn\",\n  \"password\": \"Admin@1234\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Đăng nhập - User thường",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var res = pm.response.json();",
+                  "if(res.token) pm.collectionVariables.set('token_user', res.token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@bookstore.vn\",\n  \"password\": \"Test@1234\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Lấy thông tin cá nhân (Me)",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/auth/me",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_user}}" }]
+          }
+        },
+        {
+          "name": "Kiểm tra quyền Admin",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/auth/check-admin",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_admin}}" }]
+          }
+        },
+        {
+          "name": "Đổi mật khẩu",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/change-password",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token_user}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"oldPassword\": \"Test@1234\",\n  \"newPassword\": \"NewPass@5678\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. BOOKS - Quản lý sách",
+      "item": [
+        {
+          "name": "Lấy danh sách sách (có phân trang)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/books?page=1&limit=10&sortBy=newest",
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "sortBy", "value": "newest" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Tìm kiếm sách",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/books?search=Harry&page=1&limit=5",
+              "query": [
+                { "key": "search", "value": "Harry" },
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "5" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Lọc sách theo danh mục",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/books?categoryId=1&page=1",
+              "query": [
+                { "key": "categoryId", "value": "1" },
+                { "key": "page", "value": "1" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Lọc sách có giảm giá (Flash Sale)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/books?hasDiscount=true&limit=5",
+              "query": [
+                { "key": "hasDiscount", "value": "true" },
+                { "key": "limit", "value": "5" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Xem chi tiết sách",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/books/{{book_id}}"
+          }
+        },
+        {
+          "name": "[ADMIN] Thêm sách mới",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/books",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token_admin}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Sách Test Mới\",\n  \"author\": \"Tác Giả Test\",\n  \"price\": 150000,\n  \"discount\": 20,\n  \"categoryId\": 1,\n  \"stock\": 100,\n  \"detail\": \"Mô tả sách test\",\n  \"image\": \"\",\n  \"isActive\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "[ADMIN] Cập nhật sách",
+          "request": {
+            "method": "PUT",
+            "url": "{{base_url}}/books/{{book_id}}",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token_admin}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price\": 180000,\n  \"discount\": 25,\n  \"stock\": 80\n}"
+            }
+          }
+        },
+        {
+          "name": "[ADMIN] Xóa sách (Soft Delete)",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/books/{{book_id}}",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_admin}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. CATEGORIES - Danh mục",
+      "item": [
+        {
+          "name": "Lấy tất cả danh mục",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/categories"
+          }
+        },
+        {
+          "name": "[ADMIN] Thêm danh mục",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/categories",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token_admin}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sách Giáo Khoa\",\n  \"slug\": \"sach-giao-khoa\",\n  \"description\": \"Sách dùng trong nhà trường\"\n}"
+            }
+          }
+        },
+        {
+          "name": "[ADMIN] Cập nhật danh mục",
+          "request": {
+            "method": "PUT",
+            "url": "{{base_url}}/categories/1",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token_admin}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Văn Học Việt Nam\",\n  \"isActive\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "[ADMIN] Xóa danh mục",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/categories/9",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_admin}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. CART - Giỏ hàng",
+      "item": [
+        {
+          "name": "Xem giỏ hàng",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/cart",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_user}}" }]
+          }
+        },
+        {
+          "name": "Thêm vào giỏ hàng",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/cart",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token_user}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bookId\": 1,\n  \"quantity\": 2\n}"
+            }
+          }
+        },
+        {
+          "name": "Cập nhật số lượng",
+          "request": {
+            "method": "PUT",
+            "url": "{{base_url}}/cart/update",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token_user}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bookId\": 1,\n  \"quantity\": 3\n}"
+            }
+          }
+        },
+        {
+          "name": "Đồng bộ giỏ hàng (Bulk Update)",
+          "request": {
+            "method": "PUT",
+            "url": "{{base_url}}/cart/bulk-update",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token_user}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    { \"bookId\": 1, \"quantity\": 2 },\n    { \"bookId\": 2, \"quantity\": 1 }\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Xóa toàn bộ giỏ hàng",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/cart/clear",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_user}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. ORDERS - Đơn hàng",
+      "item": [
+        {
+          "name": "Đặt hàng",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/orders",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token_user}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    { \"bookId\": 1, \"quantity\": 2 }\n  ],\n  \"shippingAddress\": {\n    \"fullName\": \"Nguyễn Văn Test\",\n    \"phone\": \"0912345678\",\n    \"address\": \"123 Đường ABC, Quận 1, TP.HCM\"\n  },\n  \"paymentMethod\": \"cod\",\n  \"note\": \"Giao giờ hành chính\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Xem đơn hàng của tôi",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/orders",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_user}}" }]
+          }
+        },
+        {
+          "name": "Xem chi tiết đơn hàng",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/orders/{{order_id}}",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_user}}" }]
+          }
+        },
+        {
+          "name": "User hủy đơn hàng",
+          "request": {
+            "method": "PUT",
+            "url": "{{base_url}}/orders/{{order_id}}/cancel",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_user}}" }]
+          }
+        },
+        {
+          "name": "[ADMIN] Lấy tất cả đơn hàng",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/admin/orders?page=1&status=pending",
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "status", "value": "pending" }
+              ]
+            },
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_admin}}" }]
+          }
+        },
+        {
+          "name": "[ADMIN] Duyệt đơn → Shipping",
+          "request": {
+            "method": "PUT",
+            "url": "{{base_url}}/admin/orders/{{order_id}}",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token_admin}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"shipping\"\n}"
+            }
+          }
+        },
+        {
+          "name": "[ADMIN] Hoàn tất đơn → Delivered",
+          "request": {
+            "method": "PUT",
+            "url": "{{base_url}}/admin/orders/{{order_id}}",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token_admin}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"delivered\"\n}"
+            }
+          }
+        },
+        {
+          "name": "[ADMIN] Hủy đơn (Hoàn kho)",
+          "request": {
+            "method": "PUT",
+            "url": "{{base_url}}/admin/orders/{{order_id}}",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token_admin}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"cancelled\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. USERS - Quản lý người dùng (Admin)",
+      "item": [
+        {
+          "name": "[ADMIN] Lấy danh sách users",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/users",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_admin}}" }]
+          }
+        },
+        {
+          "name": "Xem thông tin user theo ID",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/users/{{user_id}}",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_user}}" }]
+          }
+        },
+        {
+          "name": "Cập nhật profile (User tự sửa)",
+          "request": {
+            "method": "PUT",
+            "url": "{{base_url}}/users/profile",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token_user}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Nguyễn Văn Đã Sửa\",\n  \"phone\": \"0987654321\"\n}"
+            }
+          }
+        },
+        {
+          "name": "[ADMIN] Phân quyền user",
+          "request": {
+            "method": "PATCH",
+            "url": "{{base_url}}/users/{{user_id}}",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token_admin}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"librarian\"\n}"
+            }
+          }
+        },
+        {
+          "name": "[ADMIN] Xóa user (Soft Delete)",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/users/{{user_id}}",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_admin}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. VOUCHERS - Mã giảm giá",
+      "item": [
+        {
+          "name": "Kiểm tra voucher hợp lệ",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/vouchers/validate",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token_user}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"SALE10\",\n  \"orderTotal\": 500000\n}"
+            }
+          }
+        },
+        {
+          "name": "[ADMIN] Lấy danh sách voucher",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/vouchers",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_admin}}" }]
+          }
+        },
+        {
+          "name": "[ADMIN] Tạo voucher mới",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/vouchers",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token_admin}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"SALE10\",\n  \"discountType\": \"percent\",\n  \"discountValue\": 10,\n  \"minOrderValue\": 200000,\n  \"maxUsage\": 100,\n  \"expiresAt\": \"2026-12-31T23:59:59\"\n}"
+            }
+          }
+        },
+        {
+          "name": "[ADMIN] Xóa voucher",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/vouchers/1",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_admin}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. REVIEWS - Đánh giá sách",
+      "item": [
+        {
+          "name": "Xem đánh giá của sách",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/reviews?bookId={{book_id}}"
+          }
+        },
+        {
+          "name": "Gửi đánh giá sách",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/reviews",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token_user}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bookId\": 1,\n  \"rating\": 5,\n  \"content\": \"Sách rất hay, đáng đọc!\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Xem đánh giá cửa hàng",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/store-reviews?page=1&limit=6"
+          }
+        },
+        {
+          "name": "Gửi đánh giá cửa hàng (chống spam)",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/store-reviews",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token_user}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rating\": 5,\n  \"content\": \"Cửa hàng rất chuyên nghiệp!\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "9. UPLOAD - Tải ảnh",
+      "item": [
+        {
+          "name": "Upload ảnh lên Cloudinary (cần auth)",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/upload/cloudinary",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_admin}}" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "image", "type": "file", "src": "" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Upload ảnh KHÔNG có token (phải trả về 401)",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/upload/cloudinary",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "image", "type": "file", "src": "" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "10. NOTIFICATIONS & MESSAGES",
+      "item": [
+        {
+          "name": "Lấy thông báo của tôi",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/notifications",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_user}}" }]
+          }
+        },
+        {
+          "name": "Lấy ID Admin (để chat)",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/messages/admin-id",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_user}}" }]
+          }
+        },
+        {
+          "name": "Lấy lịch sử chat với Admin",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/messages/1",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_user}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "11. DASHBOARD - Thống kê Admin",
+      "item": [
+        {
+          "name": "[ADMIN] Xem Dashboard tổng quan",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/dashboard",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_admin}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "12. BẢO MẬT - Security Tests",
+      "item": [
+        {
+          "name": "Truy cập Admin API không có token (→ 401)",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/users"
+          }
+        },
+        {
+          "name": "Truy cập Admin API bằng token User (→ 403)",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/users",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_user}}" }]
+          }
+        },
+        {
+          "name": "Đăng nhập sai mật khẩu (→ 401)",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@bookstore.vn\",\n  \"password\": \"SaiMatKhau123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Đặt hàng sách hết stock (→ 400)",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/orders",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token_user}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [{ \"bookId\": 1, \"quantity\": 99999 }],\n  \"shippingAddress\": { \"fullName\": \"Test\", \"phone\": \"0912345678\", \"address\": \"Test\" },\n  \"paymentMethod\": \"cod\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Voucher đã hết hạn (→ 400)",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/vouchers/validate",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token_user}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"EXPIRED2023\",\n  \"orderTotal\": 500000\n}"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
