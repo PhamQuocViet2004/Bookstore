@@ -13,8 +13,8 @@ document.addEventListener("DOMContentLoaded", function() {
     loadVouchers();
     loadNotifications();
 
-    // Tự động tải lại thông báo sau 60s làm phương án dự phòng
-    setInterval(loadNotifications, 60000);
+    // Chú thích: Bỏ setInterval vì đã có Socket.io cập nhật thời gian thực (Point 17)
+    // setInterval(loadNotifications, 60000);
 
     // Close dropdown when clicking outside
     document.addEventListener("click", function(e) {
@@ -54,19 +54,30 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 });
 
-function checkAdminAccess() {
-    const userInfo = JSON.parse(localStorage.getItem("userInfo") || "{}");
-    console.log("Current User Role:", userInfo.role); // Kiểm tra xem role thực sự là gì
-    
-    // Kiểm tra không phân biệt chữ hoa chữ thường
-    const role = (userInfo.role || "").toLowerCase();
-    const allowedRoles = ['admin', 'librarian'];
-    
-    if (!allowedRoles.includes(role)) {
-        alert("Bạn không có quyền truy cập trang quản trị! Quyền hiện tại của bạn là: " + userInfo.role);
+async function checkAdminAccess() {
+    const userInfoStr = localStorage.getItem("userInfo");
+    if (!userInfoStr) {
+        window.location.href = "login.html";
+        return;
+    }
+
+    try {
+        const response = await apiFetch(getFullUrl(CONFIG.ENDPOINTS.CHECK_ADMIN));
+        const result = await safeJson(response);
+        
+        if (!response.ok || !result.isAdmin) {
+            alert("Bạn không có quyền truy cập trang quản trị!");
+            window.location.href = "index.html";
+            return;
+        }
+        
+        const userInfo = JSON.parse(userInfoStr);
+        document.getElementById("adminName").textContent = userInfo.fullName || "Admin";
+        console.log("Admin Verified: Access Granted");
+    } catch (err) {
+        console.error("Auth Check Error:", err);
         window.location.href = "index.html";
     }
-    document.getElementById("adminName").textContent = userInfo.fullName || "Admin";
 }
 
 // DASHBOARD

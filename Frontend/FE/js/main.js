@@ -45,6 +45,20 @@ async function addToCart(id, title, price, image, discount) {
 }
 
 /**
+ * Helper to calculate final price after discount (Point 15)
+ */
+function calculateFinalPrice(price, discount = 0) {
+    return Math.round(price * (1 - (discount / 100)));
+}
+
+/**
+ * Helper to format price with VND currency
+ */
+function formatPrice(amount) {
+    return (amount || 0).toLocaleString() + "đ";
+}
+
+/**
  * Global helper to render a single book card with Deal support
  */
 function renderBookCard(book) {
@@ -54,7 +68,7 @@ function renderBookCard(book) {
     const isSoldOut = book.dealSold >= book.dealQuantity;
     const isUpcoming = dealStart > now;
     const isEnded = dealEnd > 0 && now > dealEnd;
-    const hasDeal = book.discount > 0 && dealEnd > 0 && !isEnded;
+    const hasDeal = (book.discount > 0 || book.isDeal) && dealEnd > 0 && !isEnded;
 
     let statusOverlay = "";
     if (isSoldOut) {
@@ -63,7 +77,7 @@ function renderBookCard(book) {
         statusOverlay = `<div class="deal-status-overlay"><span class="deal-status-badge">Sắp diễn ra</span></div>`;
     }
 
-    const salePrice = book.price * (1 - (book.discount || 0)/100);
+    const salePrice = calculateFinalPrice(book.price, book.discount || 0);
     const progressPercent = hasDeal ? Math.min((book.dealSold / book.dealQuantity) * 100, 100) : 0;
 
     return `
@@ -84,8 +98,8 @@ function renderBookCard(book) {
         <h4>${book.title}</h4>
         
         <div class="book-price-box">
-            <span class="sale">${salePrice.toLocaleString()}đ</span>
-            <span class="old-price">${book.price.toLocaleString()}đ</span>
+            <span class="sale">${formatPrice(salePrice)}</span>
+            <span class="old-price">${formatPrice(book.price)}</span>
         </div>
 
         ${hasDeal ? `
@@ -205,14 +219,15 @@ async function loadTopDeals(page = 1) {
             const books = result.data || [];
             const pagination = result.pagination || {};
             
-            // Giả lập dữ liệu deal
+            // Dùng dữ liệu thực từ Backend (Point 16)
             const booksWithDeals = books.map(b => ({
                 ...b,
-                dealStartTime: new Date().getTime() - 1000 * 60 * 30,
-                dealEndTime: new Date().getTime() + 1000 * 60 * 60 * 3,
-                dealQuantity: 50,
-                dealSold: Math.floor(Math.random() * 45),
-                maxPerUser: 2
+                isDeal: true, // Mark as deal for UI
+                dealStartTime: b.createdAt, // Fallback
+                dealEndTime: new Date(new Date(b.createdAt).getTime() + 1000 * 60 * 60 * 24 * 7).getTime(), // Fallback: 7 days from creation
+                dealQuantity: (b.stock || 0) + (b.sold || 0),
+                dealSold: b.sold || 0,
+                maxPerUser: 5
             }));
 
             if (booksWithDeals.length > 0) {

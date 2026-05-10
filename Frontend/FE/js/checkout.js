@@ -81,45 +81,54 @@ async function loadOrderSummary() {
     const totalEl = document.getElementById("totalAmount");
 
     try {
-        const response = await apiFetch(getFullUrl(CONFIG.ENDPOINTS.CART));
-        if (response.ok) {
-            const result = await response.json();
-            const items = result.cart || result.data || [];
-            
-            if (items.length === 0) {
-                alert("Giỏ hàng của bạn đang trống!");
-                window.location.href = "index.html";
-                return;
+        // LỖI 5: Đọc sản phẩm đã chọn từ sessionStorage thay vì gọi API lấy hết giỏ hàng
+        const selectedItems = JSON.parse(sessionStorage.getItem("selectedCartItems") || "[]");
+        
+        if (selectedItems.length === 0) {
+            // Nếu không có trong session, thử lấy từ giỏ hàng (fallback)
+            const response = await apiFetch(getFullUrl(CONFIG.ENDPOINTS.CART));
+            if (response.ok) {
+                const result = await response.json();
+                const allItems = result.cart || result.data || [];
+                if (allItems.length === 0) {
+                    alert("Giỏ hàng của bạn đang trống!");
+                    window.location.href = "index.html";
+                    return;
+                }
+                renderItems(allItems, container, subtotalEl, totalEl);
             }
-
-            let subtotal = 0;
-            container.innerHTML = items.map(item => {
-                // Backend đã làm phẳng dữ liệu, item chính là thông tin sách kèm quantity
-                const title = item.title || (item.book ? item.book.title : "Sách");
-                const price = item.price || (item.book ? item.book.price : 0);
-                const discount = item.discount || (item.book ? item.book.discount : 0);
-                const image = item.image || (item.book ? item.book.image : 'image/logo/logo.png');
-                
-                const finalPrice = item.finalPrice || Math.round(price * (1 - (discount / 100)));
-                const itemTotal = finalPrice * item.quantity;
-                subtotal += itemTotal;
-
-                return `
-                    <div class="checkout-item">
-                        <img src="${image}" alt="${title}" onerror="this.src='image/logo/logo.png'">
-                        <div class="checkout-item-info">
-                            <div class="checkout-item-title">${title}</div>
-                            <div style="font-size: 13px; color: #64748b;">Số lượng: ${item.quantity}</div>
-                            <div class="checkout-item-price">${finalPrice.toLocaleString()}đ</div>
-                        </div>
-                    </div>
-                `;
-            }).join("");
-
-            subtotalEl.textContent = subtotal.toLocaleString() + "đ";
-            totalEl.textContent = subtotal.toLocaleString() + "đ";
+        } else {
+            renderItems(selectedItems, container, subtotalEl, totalEl);
         }
     } catch (e) { console.error(e); }
+}
+
+function renderItems(items, container, subtotalEl, totalEl) {
+    let subtotal = 0;
+    container.innerHTML = items.map(item => {
+        const title = item.title || (item.book ? item.book.title : "Sách");
+        const price = item.price || (item.book ? item.book.price : 0);
+        const discount = item.discount || (item.book ? item.book.discount : 0);
+        const image = item.image || (item.book ? item.book.image : 'image/logo/logo.png');
+        
+        const finalPrice = item.finalPrice || Math.round(price * (1 - (discount / 100)));
+        const itemTotal = finalPrice * item.quantity;
+        subtotal += itemTotal;
+
+        return `
+            <div class="checkout-item">
+                <img src="${image}" alt="${title}" onerror="this.src='image/logo/logo.png'">
+                <div class="checkout-item-info">
+                    <div class="checkout-item-title">${title}</div>
+                    <div style="font-size: 13px; color: #64748b;">Số lượng: ${item.quantity}</div>
+                    <div class="checkout-item-price">${finalPrice.toLocaleString()}đ</div>
+                </div>
+            </div>
+        `;
+    }).join("");
+
+    subtotalEl.textContent = subtotal.toLocaleString() + "đ";
+    totalEl.textContent = subtotal.toLocaleString() + "đ";
 }
 
 async function processOrder() {
@@ -134,6 +143,12 @@ async function processOrder() {
         return;
     }
 
+    const selectedItems = JSON.parse(sessionStorage.getItem("selectedCartItems") || "[]");
+    const itemsPayload = selectedItems.map(it => ({
+        bookId: it.bookId || it.id,
+        quantity: it.quantity
+    }));
+
     const btn = document.querySelector(".btn-checkout");
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ĐANG XỬ LÝ...';
     btn.disabled = true;
@@ -143,6 +158,7 @@ async function processOrder() {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
+                items: itemsPayload.length > 0 ? itemsPayload : null,
                 shippingAddress: {
                     fullName,
                     phone,

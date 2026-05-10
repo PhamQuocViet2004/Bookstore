@@ -6,8 +6,17 @@ const createStoreReview = async (req, res) => {
     const { rating, content } = req.body;
     const userId = req.user.id;
 
-    // Kiểm tra xem người dùng đã đánh giá chưa (tùy chọn: cho phép đánh giá nhiều lần hoặc chỉ 1 lần)
-    // Ở đây cho phép đánh giá nhiều lần để tăng tương tác
+    // Kiểm tra xem người dùng đã đánh giá chưa (Chặn spam đánh giá nhiều lần)
+    const existingReview = await StoreReview.findOne({ where: { userId } });
+    
+    if (existingReview) {
+      await existingReview.update({ rating, content });
+      return res.status(200).json({
+        success: true,
+        message: "Đánh giá của bạn đã được cập nhật!",
+        data: existingReview
+      });
+    }
 
     const review = await StoreReview.create({
       userId,

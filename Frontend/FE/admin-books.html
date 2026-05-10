@@ -388,8 +388,15 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="http://localhost:3001/socket.io/socket.io.js"></script>
     <script src="js/config.js"></script>
+    <script>
+        (function() {
+            const script = document.createElement('script');
+            const socketBase = (typeof CONFIG !== 'undefined' && CONFIG.SOCKET_URL) ? CONFIG.SOCKET_URL : 'http://localhost:3001';
+            script.src = `${socketBase}/socket.io/socket.io.js`;
+            document.head.appendChild(script);
+        })();
+    </script>
     <script src="js/admin.js"></script>
     <script src="js/admin-chat.js"></script>
     <script>

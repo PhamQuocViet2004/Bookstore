@@ -33,16 +33,19 @@ function getFullUrl(endpoint) {
 }
 
 /**
- * Hàm fetch tập trung - Tự động gửi kèm:
- * 1. credentials: 'include' (gửi cookie/session cho CORS)
- * 2. Authorization: Bearer <token> (nếu đã đăng nhập)
- * 
- * Sử dụng: thay thế fetch() bằng apiFetch() ở mọi nơi gọi API
- * 
- * @param {string} url - URL đầy đủ của API
- * @param {object} options - Các tùy chọn fetch (method, body, headers, ...)
- * @returns {Promise<Response>}
+ * Helper to parse JSON safely (Point 11)
+ * Returns the parsed object or a default value (null) if parsing fails.
  */
+async function safeJson(response, defaultValue = null) {
+    try {
+        const text = await response.text();
+        return text ? JSON.parse(text) : defaultValue;
+    } catch (e) {
+        console.error("JSON Parse Error:", e);
+        return defaultValue;
+    }
+}
+
 function apiFetch(url, options = {}) {
     // Luôn gửi credentials để CORS session hoạt động
     options.credentials = 'include';
@@ -51,11 +54,17 @@ function apiFetch(url, options = {}) {
     const token = localStorage.getItem("userToken");
     if (token) {
         options.headers = options.headers || {};
-        // Không ghi đè nếu caller đã set Authorization
         if (!options.headers["Authorization"]) {
             options.headers["Authorization"] = `Bearer ${token.trim()}`;
         }
     }
 
-    return fetch(url, options);
+    return fetch(url, options).catch(err => {
+        console.error("Network/Fetch Error:", err);
+        // Trả về một đối tượng Response "giả" để không làm hỏng chuỗi xử lý
+        return new Response(JSON.stringify({ message: "Không thể kết nối đến máy chủ." }), {
+            status: 503,
+            headers: { 'Content-Type': 'application/json' }
+        });
+    });
 }

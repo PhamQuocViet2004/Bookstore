@@ -1,5 +1,13 @@
+const { Model } = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
-  const Voucher = sequelize.define('Voucher', {
+  class Voucher extends Model {
+    static associate(models) {
+      Voucher.hasMany(models.Order, { foreignKey: 'voucherId', as: 'orders' });
+    }
+  }
+
+  Voucher.init({
     id: {
       type: DataTypes.INTEGER.UNSIGNED,
       primaryKey: true,
@@ -48,6 +56,8 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: true
     }
   }, {
+    sequelize,
+    modelName: 'Voucher',
     tableName: 'vouchers',
     timestamps: true
   });

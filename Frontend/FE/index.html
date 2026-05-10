@@ -337,8 +337,18 @@
         </div>
     </div>
 
-    <script src="http://localhost:3001/socket.io/socket.io.js"></script>
+    <!-- SOCKET.IO DYNAMIC LOADING (POINT 13) -->
     <script src="js/config.js"></script>
+    <!-- SOCKET.IO DYNAMIC LOADING (POINT 13) -->
+    <script>
+        (function() {
+            const script = document.createElement('script');
+            // Try to use CONFIG.SOCKET_URL if available, otherwise fallback to localhost
+            const socketBase = (typeof CONFIG !== 'undefined' && CONFIG.SOCKET_URL) ? CONFIG.SOCKET_URL : 'http://localhost:3001';
+            script.src = `${socketBase}/socket.io/socket.io.js`;
+            document.head.appendChild(script);
+        })();
+    </script>
     <script src="js/main.js"></script>
     <script src="js/banner.js"></script>
     <script src="js/auth.js"></script>

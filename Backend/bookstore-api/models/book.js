@@ -64,6 +64,7 @@ module.exports = (sequelize, DataTypes) => {
     sequelize,
     modelName: 'Book',
     tableName: 'books',
+    paranoid: true,
     indexes: [
       {
         type: 'FULLTEXT',

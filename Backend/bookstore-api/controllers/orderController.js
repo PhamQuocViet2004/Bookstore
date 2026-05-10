@@ -285,8 +285,39 @@ const updateOrderStatus = async (req, res) => {
 
     if (!order) return res.status(404).json({ message: "Đơn hàng không tồn tại." });
 
+    const oldStatus = order.status;
+    const newStatus = status || order.status;
+
+    // Quản lý tồn kho khi đổi trạng thái sang 'cancelled' hoặc ngược lại
+    if (newStatus === 'cancelled' && oldStatus !== 'cancelled') {
+        // Trả lại kho
+        const orderItems = await OrderItem.findAll({ where: { orderId: order.id } });
+        for (const item of orderItems) {
+            const book = await Book.findByPk(item.bookId);
+            if (book) {
+                await book.update({
+                    stock: book.stock + item.quantity,
+                    sold: book.sold - item.quantity
+                });
+            }
+        }
+    } else if (oldStatus === 'cancelled' && (newStatus === 'pending' || newStatus === 'confirmed' || newStatus === 'shipping')) {
+        // Kiểm tra xem có đủ hàng để khôi phục không
+        const orderItems = await OrderItem.findAll({ where: { orderId: order.id } });
+        for (const item of orderItems) {
+            const book = await Book.findByPk(item.bookId);
+            if (!book || book.stock < item.quantity) {
+                return res.status(400).json({ message: `Sách "${book ? book.title : '???'}" không đủ tồn kho để khôi phục đơn hàng.` });
+            }
+            await book.update({
+                stock: book.stock - item.quantity,
+                sold: book.sold + item.quantity
+            });
+        }
+    }
+
     await order.update({
-      status: status || order.status,
+      status: newStatus,
       isPaid: isPaid !== undefined ? isPaid : order.isPaid,
       paidAt: (isPaid && !order.isPaid) ? new Date() : order.paidAt,
       processedBy: req.user.id
