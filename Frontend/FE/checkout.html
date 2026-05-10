@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thanh toán - BookStore</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        .checkout-container {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 30px;
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        .checkout-form, .order-summary {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #1e293b; }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+        .form-group input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); }
+        
+        .payment-methods { display: grid; gap: 12px; margin-top: 10px; }
+        .method-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .method-item:hover { border-color: var(--primary); background: #f8fafc; }
+        .method-item.active { border-color: var(--primary); background: #eff6ff; }
+        .method-item input { width: auto; }
+
+        .summary-item { display: flex; justify-content: space-between; margin-bottom: 15px; color: #64748b; }
+        .summary-total { display: flex; justify-content: space-between; margin-top: 20px; padding-top: 20px; border-top: 2px dashed #e2e8f0; font-size: 20px; font-weight: 800; color: #0f172a; }
+        
+        .btn-checkout {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 25px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-checkout:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3); }
+
+        .checkout-item {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .checkout-item img { width: 60px; height: 80px; object-fit: cover; border-radius: 8px; }
+        .checkout-item-info { flex: 1; }
+        .checkout-item-title { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+        .checkout-item-price { font-weight: 700; color: var(--primary); font-size: 14px; }
+
+        @media (max-width: 900px) {
+            .checkout-container { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo" onclick="location.href='index.html'">
+            <i class="fa-solid fa-book-open-reader"></i>
+            <span>BookStore</span>
+        </div>
+        <nav class="nav">
+            <a href="index.html"><i class="fa-solid fa-house"></i><span>Trang chủ</span></a>
+            <a href="cart.html"><i class="fa-solid fa-cart-shopping"></i><span>Giỏ hàng</span></a>
+        </nav>
+    </header>
+
+    <div class="checkout-container">
+        <div class="checkout-form">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                <h2 style="margin: 0;"><i class="fa-solid fa-truck-ramp-box"></i> Thông tin giao hàng</h2>
+                <button type="button" onclick="openAddressModal()" style="background: var(--primary); color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600;">
+                    <i class="fa-solid fa-address-book"></i> Chọn từ sổ địa chỉ
+                </button>
+            </div>
+            
+            <div class="form-group">
+                <label>Họ và tên người nhận</label>
+                <input type="text" id="fullName" placeholder="Nhập họ tên đầy đủ">
+            </div>
+
+            <div class="form-group">
+                <label>Số điện thoại</label>
+                <input type="text" id="phone" placeholder="Số điện thoại nhận hàng">
+            </div>
+
+            <div class="form-group">
+                <label>Địa chỉ nhận hàng</label>
+                <textarea id="address" rows="3" placeholder="Số nhà, tên đường, phường/xã, quận/huyện, tỉnh/thành phố..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Ghi chú đơn hàng</label>
+                <textarea id="note" rows="2" placeholder="Ví dụ: Giao giờ hành chính, gọi trước khi đến..."></textarea>
+            </div>
+
+            <h3 style="margin: 30px 0 15px;"><i class="fa-solid fa-credit-card"></i> Phương thức thanh toán</h3>
+            <div class="payment-methods">
+                <label class="method-item active">
+                    <input type="radio" name="paymentMethod" value="cod" checked>
+                    <i class="fa-solid fa-money-bill-wave" style="color: #059669; font-size: 20px;"></i>
+                    <span>Thanh toán khi nhận hàng (COD)</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="order-summary">
+            <h3 style="margin-bottom: 20px;">Tóm tắt đơn hàng</h3>
+            <div id="checkoutItems">
+                <!-- Danh sách sản phẩm mini -->
+            </div>
+
+            <div style="margin-top: 25px;">
+                <div class="summary-item">
+                    <span>Tạm tính</span>
+                    <span id="subtotal">0đ</span>
+                </div>
+                <div class="summary-item">
+                    <span>Phí vận chuyển</span>
+                    <span style="color: #059669; font-weight: 600;">Miễn phí</span>
+                </div>
+                <div class="summary-total">
+                    <span>Tổng tiền</span>
+                    <span id="totalAmount" style="color: var(--primary);">0đ</span>
+                </div>
+            </div>
+
+            <button class="btn-checkout" onclick="processOrder()">
+                <i class="fa-solid fa-lock"></i> ĐẶT HÀNG NGAY
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL SỔ ĐỊA CHỈ -->
+    <div id="checkoutAddressModal" class="overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center;">
+        <div class="modal" style="background:#fff; width:90%; max-width:500px; border-radius:12px; padding:20px; max-height:80vh; overflow-y:auto;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h3>Chọn địa chỉ giao hàng</h3>
+                <button onclick="document.getElementById('checkoutAddressModal').style.display='none'" style="background:none; border:none; font-size:24px; cursor:pointer;">&times;</button>
+            </div>
+            <div id="checkoutAddressList" style="display:flex; flex-direction:column; gap:10px;">
+                <!-- Địa chỉ tải từ API -->
+            </div>
+            <div style="margin-top: 15px; text-align: center;">
+                <a href="profile.html#address" style="color: var(--primary); text-decoration: none; font-weight: 600; font-size: 14px;">+ Quản lý sổ địa chỉ</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/checkout.js"></script>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-column">
+                <h4><i class="fa-solid fa-book-bookmark"></i> BookStore</h4>
+                <p>Nơi khơi nguồn tri thức và đam mê. Chúng tôi cam kết mang đến những đầu sách chất lượng cao nhất với
+                    giá thành tốt nhất thị trường.</p>
+                <div class="footer-social">
+                    <a href="#"><i class="fa-brands fa-facebook"></i></a>
+                    <a href="#"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="#"><i class="fa-brands fa-youtube"></i></a>
+                    <a href="#"><i class="fa-brands fa-tiktok"></i></a>
+                </div>
+            </div>
+
+            <div class="footer-column">
+                <h4>Danh mục nổi bật</h4>
+                <ul>
+                    <li><a href="category.html?categoryId=8">Sách Văn học</a></li>
+                    <li><a href="category.html?categoryId=6">Tiểu thuyết</a></li>
+                    <li><a href="category.html?categoryId=2">Kinh tế & Kinh doanh</a></li>
+                    <li><a href="category.html?categoryId=7">Truyện tranh</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-column">
+                <h4>Chính sách</h4>
+                <ul>
+                    <li><a href="#">Chính sách đổi trả</a></li>
+                    <li><a href="#">Chính sách bảo mật</a></li>
+                    <li><a href="#">Vận chuyển & Giao nhận</a></li>
+                    <li><a href="#">Hình thức thanh toán</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-column">
+                <h4>Kết nối</h4>
+                <ul>
+                    <li><i class="fa-solid fa-location-dot"></i> 123 Đường Sách, Quận 1, TP.HCM</li>
+                    <li><i class="fa-solid fa-phone"></i> Hotline: 1900 1234</li>
+                    <li><i class="fa-solid fa-envelope"></i> Email: info@bookstore.vn</li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            &copy; 2026 BookStore Project. Designed for a better reading experience.
+        </div>
+    </footer>
+</body>
+</html>

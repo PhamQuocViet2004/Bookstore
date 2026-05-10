@@ -1,0 +1,235 @@
+/* cart.css - Premium Cart Interface */
+
+.cart-container {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 40px;
+}
+
+.page-title {
+    font-size: 24px;
+    font-weight: 900;
+    margin-bottom: 30px;
+    color: var(--primary);
+}
+
+.cart-wrapper {
+    display: flex;
+    gap: 30px;
+}
+
+.cart-left {
+    flex: 1;
+}
+
+.cart-header-row {
+    background: var(--white);
+    padding: 15px 25px;
+    border-radius: var(--radius-md);
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid var(--border);
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.cart-item {
+    background: var(--white);
+    padding: 20px 25px;
+    border-radius: var(--radius-md);
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    border: 1px solid var(--border);
+    transition: var(--transition);
+}
+
+.cart-item:hover {
+    border-color: var(--primary-vivid);
+    box-shadow: var(--shadow-sm);
+}
+
+.cart-item img {
+    width: 80px;
+    height: 110px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.item-info {
+    flex: 1;
+}
+
+.item-info h4 {
+    font-size: 16px;
+    font-weight: 800;
+    margin-bottom: 8px;
+    color: var(--primary);
+}
+
+.item-price-box .price {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--primary-vivid);
+}
+
+.item-price-box .old {
+    font-size: 12px;
+    text-decoration: line-through;
+    color: var(--text-muted);
+    margin-left: 10px;
+}
+
+.quantity-control {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.quantity-control button {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: #f8fafc;
+    cursor: pointer;
+    font-weight: 800;
+    transition: var(--transition);
+}
+
+.quantity-control button:hover {
+    background: #f1f5f9;
+    color: var(--primary-vivid);
+}
+
+.quantity-control input {
+    width: 45px;
+    text-align: center;
+    border: none;
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.btn-remove {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    font-size: 18px;
+    transition: var(--transition);
+}
+
+.btn-remove:hover {
+    color: #ef4444;
+    transform: scale(1.1);
+}
+
+/* RIGHT: SUMMARY */
+.cart-right {
+    width: 380px;
+    flex-shrink: 0;
+}
+
+.summary-card {
+    background: var(--white);
+    padding: 30px;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    position: sticky;
+    top: 100px;
+}
+
+.summary-card h3 {
+    font-size: 18px;
+    font-weight: 900;
+    margin-bottom: 25px;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 15px;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.summary-row.total {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 2px dashed #f1f5f9;
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--primary-vivid);
+}
+
+/* VOUCHER SECTION */
+.voucher-box {
+    margin: 25px 0;
+}
+
+.voucher-box h4 {
+    font-size: 13px;
+    font-weight: 800;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.voucher-input {
+    display: flex;
+    gap: 10px;
+}
+
+.voucher-input input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.btn-apply {
+    padding: 10px 15px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.btn-checkout {
+    width: 100%;
+    padding: 18px;
+    background: var(--primary-vivid);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 900;
+    cursor: pointer;
+    transition: var(--transition);
+    margin-top: 10px;
+}
+
+.btn-checkout:hover {
+    background: var(--primary-hover);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(59, 130, 246, 0.2);
+}
+
+@media (max-width: 1024px) {
+    .cart-wrapper { flex-direction: column; }
+    .cart-right { width: 100%; }
+}

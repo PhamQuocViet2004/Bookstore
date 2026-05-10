@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookStore - Mua sách trực tuyến</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/store-reviews.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body>
+
+    <!-- HEADER -->
+    <header class="header">
+        <div class="logo" onclick="location.href='index.html'">
+            <i class="fa-solid fa-book-open-reader"></i>
+            <span>BookStore</span>
+        </div>
+
+        <div class="search">
+            <input type="text" id="searchInput" placeholder="Tìm kiếm tựa sách, tác giả, ISBN...">
+            <button onclick="search()"><i class="fa-solid fa-magnifying-glass"></i> Tìm</button>
+        </div>
+
+        <nav class="nav">
+            <a href="index.html" class="active"><i class="fa-solid fa-house"></i><span>Trang chủ</span></a>
+            <a href="cart.html"><i class="fa-solid fa-cart-shopping"></i><span>Giỏ hàng</span></a>
+            <div class="nav-item-wrapper" id="adminNavWrapper">
+                <a href="admin-books.html" id="admin-nav-link" class="hidden"><i class="fa-solid fa-gauge-high"></i><span>Quản trị</span></a>
+                <span class="nav-badge" id="adminChatBadge"></span>
+            </div>
+            <!-- Notification Bell -->
+            <div class="notification-wrapper" id="notifWrapper" style="display: none;">
+                <div class="notif-bell" onclick="toggleNotifDropdown()">
+                    <i class="fa-solid fa-bell"></i>
+                    <span class="notif-count" id="notifCount" style="display: none;">0</span>
+                </div>
+                <div class="notif-dropdown" id="notifDropdown">
+                    <div class="notif-header">
+                        <span>Thông báo</span>
+                        <button onclick="markAllNotifAsRead()">Đã đọc tất cả</button>
+                    </div>
+                    <div class="notif-list" id="notifList">
+                        <p style="padding: 15px; text-align: center; color: #64748b;">Đang tải...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="user-menu" id="userMenu">
+                <a href="login.html" id="auth-link"><i class="fa-solid fa-circle-user"></i><span>Tài khoản</span></a>
+                <div class="user-dropdown" id="userDropdown">
+                    <a href="profile.html"><i class="fa-solid fa-user-gear"></i> Hồ sơ cá nhân</a>
+                    <a href="my-orders.html"><i class="fa-solid fa-box-archive"></i> Đơn hàng của tôi</a>
+                    <a href="profile.html#wishlist"><i class="fa-solid fa-heart"></i> Danh sách yêu thích</a>
+                    <a href="admin-books.html" id="admin-link-dropdown" class="hidden"><i class="fa-solid fa-gauge-high"></i> Trang quản trị</a>
+                    <hr style="margin: 8px 0; border-color: #f1f5f9;">
+                    <a href="#" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Đăng xuất</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- CAM KẾT DỊCH VỤ -->
+    <section class="commitment-bar">
+        <div class="commit-item">
+            <i class="fa-solid fa-circle-check"></i>
+            <div class="commit-text">
+                <strong>100% Chính hãng</strong>
+                <span>Hoàn tiền nếu giả</span>
+            </div>
+        </div>
+        <div class="commit-item">
+            <i class="fa-solid fa-truck-fast"></i>
+            <div class="commit-text">
+                <strong>Freeship mọi đơn</strong>
+                <span>Nội thành 24h</span>
+            </div>
+        </div>
+        <div class="commit-item">
+            <i class="fa-solid fa-arrows-rotate"></i>
+            <div class="commit-text">
+                <strong>30 Ngày đổi trả</strong>
+                <span>Thủ tục nhanh gọn</span>
+            </div>
+        </div>
+        <div class="commit-item">
+            <i class="fa-solid fa-headset"></i>
+            <div class="commit-text">
+                <strong>Hỗ trợ 24/7</strong>
+                <span>Tư vấn tận tâm</span>
+            </div>
+        </div>
+        <div class="commit-item">
+            <i class="fa-solid fa-money-bill-1-wave"></i>
+            <div class="commit-text">
+                <strong>Thanh toán COD</strong>
+                <span>Nhận hàng trả tiền</span>
+            </div>
+        </div>
+        <div class="commit-item">
+            <i class="fa-solid fa-box-open"></i>
+            <div class="commit-text">
+                <strong>Kiểm hàng tại chỗ</strong>
+                <span>An tâm mua sắm</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- BANNER WRAPPER -->
+    <div class="banner-wrapper">
+        <div class="banner">
+            <div class="slider">
+                <div class="slide active">
+                    <img src="image/banner/1.jpg" alt="Banner 1" onerror="this.src='https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=700&h=280'">
+                    <img src="image/banner/2.jpg" alt="Banner 2" onerror="this.src='https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&w=700&h=280'">
+                </div>
+                <div class="slide">
+                    <img src="image/banner/3.jpg" alt="Banner 3" onerror="this.src='https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=700&h=280'">
+                    <img src="image/banner/6.jpg" alt="Banner 4" onerror="this.src='https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=700&h=280'">
+                </div>
+                <div class="slide">
+                    <img src="image/banner/4.jpg" alt="Banner 5" onerror="this.src='https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=700&h=280'">
+                    <img src="image/banner/5.jpg" alt="Banner 6" onerror="this.src='https://images.unsplash.com/photo-1516339901600-2e1a6298ed74?auto=format&fit=crop&w=700&h=280'">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN -->
+    <main class="main">
+
+        <!-- SIDEBAR DANH MỤC -->
+        <aside class="category">
+            <h3>Danh mục</h3>
+            <nav>
+                <a href="category.html?cat=khoa-hoc-lich-su">Khoa học & Lịch sử</a>
+                <a href="category.html?cat=kinh-te-kinh-doanh">Kinh tế & Kinh doanh</a>
+                <a href="category.html?cat=ky-nang-mem">Kỹ năng mềm</a>
+                <a href="category.html?cat=van-hoc">Văn học</a>
+                <a href="category.html?cat=tieu-thuyet">Tiểu thuyết</a>
+                <a href="category.html?cat=truyen-tranh">Truyện tranh</a>
+                <a href="category.html?cat=ngoai-ngu">Ngoại ngữ</a>
+                <a href="category.html?cat=sach-nau-an">Sách nấu ăn</a>
+            </nav>
+        </aside>
+
+        <!-- CONTENT -->
+        <section class="content">
+
+            <!-- TOP DEAL -->
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 25px; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px;">
+                <h2 class="section-title" style="margin: 0; font-size: 24px;">🔥 Top Deal - Flash Sale</h2>
+                <div class="top-deal-pagination" id="topDealPagination" style="display: flex; gap: 10px;">
+                    <!-- Nút điều hướng sẽ được chèn qua JS -->
+                </div>
+            </div>
+
+            <div class="book-list" id="topDealList">
+                <!-- Dynamic content via JS -->
+                <div class="loading" style="grid-column: 1/-1; text-align: center; padding: 40px;">
+                    <i class="fa-solid fa-spinner fa-spin"></i> Đang tải các ưu đãi hot...
+                </div>
+            </div>
+
+            <!-- TẤT CẢ SÁCH (DÀNH CHO BẠN) -->
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 50px; margin-bottom: 25px; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px;">
+                <h2 class="section-title" style="margin: 0; font-size: 24px;">📚 Sách mới nhất</h2>
+                <div class="filter-sort" style="display: flex; gap: 15px;">
+                    <select id="sortBy" onchange="loadAllBooks(1)" style="padding: 8px; border-radius: 8px; border: 1.5px solid #e2e8f0; font-weight: 600;">
+                        <option value="newest">Mới nhất</option>
+                        <option value="price-asc">Giá thấp đến cao</option>
+                        <option value="price-desc">Giá cao đến thấp</option>
+                        <option value="best-seller">Bán chạy nhất</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="book-list" id="allBooksList">
+                <!-- Dynamic content via JS -->
+            </div>
+
+            <!-- PHÂN TRANG -->
+            <div id="pagination" class="pagination" style="display: flex; justify-content: center; gap: 10px; margin-top: 40px; margin-bottom: 40px;">
+                <!-- Dynamic buttons -->
+            </div>
+
+            <script>
+                document.addEventListener("DOMContentLoaded", async function() {
+                    // Tải Top Deals
+                    loadTopDeals();
+                    // Tải Tất cả sách (Trang 1)
+                    loadAllBooks(1);
+                    // Tải danh mục động
+                    loadCategoriesSidebar();
+                });
+            </script>
+        </section>
+
+    </main>
+
+    <!-- STORE REVIEWS SECTION -->
+    <section class="store-reviews-section">
+        <div class="reviews-container">
+            <div class="reviews-header">
+                <h2>Khách hàng nói gì về BookStore</h2>
+                <div class="rating-summary">
+                    <div class="stars-display" id="storeStarsDisplay">
+                        <!-- Dynamic stars -->
+                    </div>
+                    <span style="color: #64748b;" id="storeTotalReviews">(0 đánh giá)</span>
+                </div>
+            </div>
+
+            <div class="reviews-layout">
+                <!-- KHUNG ĐÁNH GIÁ (Rating Form Box) -->
+                <div class="rating-form-box" id="ratingFormBox">
+                    <h3>Gửi đánh giá của bạn</h3>
+                    <p>Chia sẻ trải nghiệm của bạn về dịch vụ của chúng tôi</p>
+                    
+                    <div class="star-rating-input" id="starInput">
+                        <i class="fa-solid fa-star" data-value="1"></i>
+                        <i class="fa-solid fa-star" data-value="2"></i>
+                        <i class="fa-solid fa-star" data-value="3"></i>
+                        <i class="fa-solid fa-star" data-value="4"></i>
+                        <i class="fa-solid fa-star" data-value="5"></i>
+                    </div>
+
+                    <textarea id="reviewText" placeholder="Hãy viết cảm nhận của bạn tại đây..."></textarea>
+                    
+                    <button class="btn-submit-review" onclick="submitStoreReview()">Gửi đánh giá ngay</button>
+                </div>
+
+                <!-- DANH SÁCH ĐÁNH GIÁ (Testimonials Grid) -->
+                <div class="reviews-content-wrapper">
+                    <div class="reviews-filter-bar">
+                        <button class="filter-btn active" onclick="filterByRating('all')">Tất cả</button>
+                        <button class="filter-btn" onclick="filterByRating(5)">5 sao</button>
+                        <button class="filter-btn" onclick="filterByRating(4)">4 sao</button>
+                        <button class="filter-btn" onclick="filterByRating(3)">3 sao</button>
+                        <button class="filter-btn" onclick="filterByRating(2)">2 sao</button>
+                        <button class="filter-btn" onclick="filterByRating(1)">1 sao</button>
+                    </div>
+                    
+                    <div class="reviews-grid" id="storeReviewsGrid">
+                        <!-- Reviews injected here -->
+                    </div>
+
+                    <div class="pagination-container" id="reviewsPagination">
+                        <!-- Pagination buttons injected here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-column">
+                <h4><i class="fa-solid fa-book-bookmark"></i> BookStore</h4>
+                <p>Nơi khơi nguồn tri thức và đam mê. Chúng tôi cam kết mang đến những đầu sách chất lượng cao nhất với
+                    giá thành tốt nhất thị trường.</p>
+                <div class="footer-social">
+                    <a href="#"><i class="fa-brands fa-facebook"></i></a>
+                    <a href="#"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="#"><i class="fa-brands fa-youtube"></i></a>
+                    <a href="#"><i class="fa-brands fa-tiktok"></i></a>
+                </div>
+            </div>
+
+            <div class="footer-column">
+                <h4>Danh mục nổi bật</h4>
+                <ul>
+                    <li><a href="category.html?cat=van-hoc">Sách Văn học</a></li>
+                    <li><a href="category.html?cat=tieu-thuyet">Tiểu thuyết</a></li>
+                    <li><a href="category.html?cat=kinh-te">Kinh tế & Kinh doanh</a></li>
+                    <li><a href="category.html?cat=truyen-tranh">Truyện tranh</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-column">
+                <h4>Chính sách</h4>
+                <ul>
+                    <li><a href="#">Chính sách đổi trả</a></li>
+                    <li><a href="#">Chính sách bảo mật</a></li>
+                    <li><a href="#">Vận chuyển & Giao nhận</a></li>
+                    <li><a href="#">Hình thức thanh toán</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-column">
+                <h4>Kết nối</h4>
+                <ul>
+                    <li><i class="fa-solid fa-location-dot"></i> 123 Đường Sách, Quận 1, TP.HCM</li>
+                    <li><i class="fa-solid fa-phone"></i> Hotline: 1900 1234</li>
+                    <li><i class="fa-solid fa-envelope"></i> Email: info@bookstore.vn</li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            &copy; 2026 BookStore Project. Designed for a better reading experience.
+        </div>
+    </footer>
+
+    <!-- CHAT WIDGET -->
+    <div class="chat-widget" id="chatWidget">
+        <button class="chat-toggle-btn" id="chatToggle">
+            <i class="fa-solid fa-comments"></i>
+            <span class="chat-badge hidden" id="chatBadge">0</span>
+        </button>
+
+        <div class="chat-window hidden" id="chatWindow">
+            <div class="chat-header">
+                <div class="chat-admin-info">
+                    <div class="chat-avatar-small">
+                        <i class="fa-solid fa-user-tie"></i>
+                    </div>
+                    <div>
+                        <div class="chat-title">Hỗ trợ khách hàng</div>
+                        <div class="chat-status"><span class="status-dot"></span> Đang trực tuyến</div>
+                    </div>
+                </div>
+                <button class="chat-close" id="chatClose"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="chat-messages" id="chatMessages">
+                <!-- Messages will appear here -->
+                <div class="message system">Chào mừng bạn đến với BookStore! Bạn cần hỗ trợ gì không?</div>
+            </div>
+
+            <div class="chat-input-area">
+                <input type="text" id="chatInput" placeholder="Nhập tin nhắn...">
+                <button id="chatSend"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <script src="http://localhost:3001/socket.io/socket.io.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/banner.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/store-reviews.js"></script>
+    <script src="js/chat.js"></script>
+</body>
+
+</html>

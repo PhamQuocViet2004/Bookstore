@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết sách - BookStore</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        .product-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 450px 1fr;
+            gap: 50px;
+        }
+        .product-image-section {
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        .product-image-section img {
+            width: 100%;
+            border-radius: 12px;
+            object-fit: contain;
+        }
+        
+        .product-info-section h1 {
+            font-size: 32px;
+            font-weight: 900;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+        .author-info {
+            font-size: 15px;
+            color: #64748b;
+            margin-bottom: 25px;
+        }
+        .author-info span { font-weight: 700; color: var(--text-main); }
+
+        .price-card {
+            background: #f0f7ff;
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+        .current-price { font-size: 36px; font-weight: 900; color: var(--primary-vivid); }
+        .old-price-detail { font-size: 18px; text-decoration: line-through; color: #94a3b8; }
+        .discount-label { background: var(--accent); color: white; padding: 4px 12px; border-radius: 8px; font-weight: 800; }
+
+        .action-group { display: flex; gap: 15px; margin-top: 40px; }
+        .btn-buy-now {
+            flex: 1;
+            padding: 18px;
+            background: var(--primary-vivid);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 16px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .btn-buy-now:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3); }
+        
+        .btn-add-to-cart-big {
+            flex: 1;
+            padding: 18px;
+            background: white;
+            color: var(--primary-vivid);
+            border: 2px solid var(--primary-vivid);
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .specs-table {
+            width: 100%;
+            margin-top: 50px;
+            border-collapse: collapse;
+        }
+        .specs-table td {
+            padding: 15px 0;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 14px;
+        }
+        .specs-label { color: #64748b; width: 150px; }
+        .specs-value { font-weight: 600; }
+
+        @media (max-width: 800px) {
+            .product-container { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo" onclick="location.href='index.html'">
+            <i class="fa-solid fa-book-open-reader"></i>
+            <span>BookStore</span>
+        </div>
+        <div class="search">
+            <input type="text" id="searchInput" placeholder="Tìm kiếm tựa sách, tác giả...">
+            <button onclick="search()"><i class="fa-solid fa-magnifying-glass"></i> <span>Tìm</span></button>
+            <div id="suggestBox" class="suggest-box"></div>
+        </div>
+        <nav class="nav">
+            <a href="index.html"><i class="fa-solid fa-house"></i><span>Trang chủ</span></a>
+            <a href="cart.html"><i class="fa-solid fa-cart-shopping"></i><span>Giỏ hàng</span></a>
+        </nav>
+    </header>
+
+    <div id="productDetail" class="product-container">
+        <!-- Tải động qua JS -->
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", loadProductDetail);
+
+        async function loadProductDetail() {
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get("id");
+            if (!id) return;
+
+            try {
+                const res = await apiFetch(getFullUrl(CONFIG.ENDPOINTS.BOOKS + "/" + id));
+                if (res.ok) {
+                    const result = await res.json();
+                    const book = result.data || result;
+                    const salePrice = book.price * (1 - (book.discount / 100));
+
+                    document.getElementById("productDetail").innerHTML = `
+                        <div class="product-image-section">
+                            <img src="${book.image || 'image/logo/logo.png'}" alt="${book.title}" onerror="this.src='image/logo/logo.png'">
+                        </div>
+                        <div class="product-info-section">
+                            <h1>${book.title}</h1>
+                            <div class="author-info">
+                                Tác giả: <span>${book.author || 'Chưa cập nhật'}</span> | Thể loại: <span>${book.category ? book.category.name : 'Đang cập nhật'}</span>
+                            </div>
+
+                            <div class="price-card">
+                                <span class="current-price">${salePrice.toLocaleString()}đ</span>
+                                ${book.discount > 0 ? `
+                                    <span class="old-price-detail">${book.price.toLocaleString()}đ</span>
+                                    <span class="discount-label">-${book.discount}%</span>
+                                ` : ''}
+                            </div>
+
+                            <p style="color: #64748b; line-height: 1.8;">
+                                ${book.detail || 'Hiện chưa có mô tả chi tiết cho cuốn sách này.'}
+                            </p>
+
+                            <div class="action-group">
+                                <button class="btn-buy-now" onclick="buyNow(${book.id})">MUA NGAY</button>
+                                <button class="btn-add-to-cart-big" onclick="addToCart(${book.id})">
+                                    <i class="fa-solid fa-cart-shopping"></i> THÊM GIỎ HÀNG
+                                </button>
+                            </div>
+
+                            <table class="specs-table">
+                                <tr>
+                                    <td class="specs-label">Mã hàng</td>
+                                    <td class="specs-value">${1000 + parseInt(book.id)}</td>
+                                    <td class="specs-label">Nhà cung cấp</td>
+                                    <td class="specs-value">NXB Trẻ</td>
+                                </tr>
+                                <tr>
+                                    <td class="specs-label">Trọng lượng</td>
+                                    <td class="specs-value">350g</td>
+                                    <td class="specs-label">Kích thước</td>
+                                    <td class="specs-value">14.5 x 20.5 cm</td>
+                                </tr>
+                                <tr>
+                                    <td class="specs-label">Số trang</td>
+                                    <td class="specs-value">280</td>
+                                    <td class="specs-label">Hình thức</td>
+                                    <td class="specs-value">Bìa Mềm</td>
+                                </tr>
+                            </table>
+                        </div>
+                    `;
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        function buyNow(id) {
+            // Logic Mua ngay: Thêm vào giỏ rồi đi đến checkout
+            addToCart(id).then(() => {
+                window.location.href = "checkout.html";
+            });
+        }
+    </script>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-column">
+                <h4><i class="fa-solid fa-book-bookmark"></i> BookStore</h4>
+                <p>Nơi khơi nguồn tri thức và đam mê. Chúng tôi cam kết mang đến những đầu sách chất lượng cao nhất với
+                    giá thành tốt nhất thị trường.</p>
+                <div class="footer-social">
+                    <a href="#"><i class="fa-brands fa-facebook"></i></a>
+                    <a href="#"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="#"><i class="fa-brands fa-youtube"></i></a>
+                    <a href="#"><i class="fa-brands fa-tiktok"></i></a>
+                </div>
+            </div>
+
+            <div class="footer-column">
+                <h4>Danh mục nổi bật</h4>
+                <ul>
+                    <li><a href="category.html?categoryId=8">Sách Văn học</a></li>
+                    <li><a href="category.html?categoryId=6">Tiểu thuyết</a></li>
+                    <li><a href="category.html?categoryId=2">Kinh tế & Kinh doanh</a></li>
+                    <li><a href="category.html?categoryId=7">Truyện tranh</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-column">
+                <h4>Chính sách</h4>
+                <ul>
+                    <li><a href="#">Chính sách đổi trả</a></li>
+                    <li><a href="#">Chính sách bảo mật</a></li>
+                    <li><a href="#">Vận chuyển & Giao nhận</a></li>
+                    <li><a href="#">Hình thức thanh toán</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-column">
+                <h4>Kết nối</h4>
+                <ul>
+                    <li><i class="fa-solid fa-location-dot"></i> 123 Đường Sách, Quận 1, TP.HCM</li>
+                    <li><i class="fa-solid fa-phone"></i> Hotline: 1900 1234</li>
+                    <li><i class="fa-solid fa-envelope"></i> Email: info@bookstore.vn</li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            &copy; 2026 BookStore Project. Designed for a better reading experience.
+        </div>
+    </footer>
+</body>
+</html>

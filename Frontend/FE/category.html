@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh mục sản phẩm - BookStore</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        .category-page-container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 30px;
+            max-width: 1400px;
+            margin: 40px auto;
+            padding: 0 5%;
+        }
+        .filter-sidebar {
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            height: fit-content;
+            position: sticky;
+            top: 110px;
+        }
+        .filter-group { margin-bottom: 30px; }
+        .filter-group h3 { font-size: 16px; font-weight: 800; margin-bottom: 15px; color: var(--primary); }
+        
+        .cat-list { list-style: none; }
+        .cat-list li a {
+            display: block;
+            padding: 10px 0;
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .cat-list li a:hover, .cat-list li a.active { color: var(--primary-vivid); padding-left: 10px; font-weight: 700; }
+
+        .price-filter input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 8px;
+        }
+        .btn-apply {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary-vivid);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+        @media (max-width: 900px) {
+            .category-page-container { grid-template-columns: 1fr; }
+            .filter-sidebar { display: none; } /* Có thể làm menu trượt sau */
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo" onclick="location.href='index.html'">
+            <i class="fa-solid fa-book-open-reader"></i>
+            <span>BookStore</span>
+        </div>
+        <div class="search">
+            <input type="text" id="searchInput" placeholder="Tìm kiếm tựa sách, tác giả...">
+            <button onclick="search()"><i class="fa-solid fa-magnifying-glass"></i> <span>Tìm</span></button>
+            <div id="suggestBox" class="suggest-box"></div>
+        </div>
+        <nav class="nav">
+            <a href="index.html"><i class="fa-solid fa-house"></i><span>Trang chủ</span></a>
+            <a href="cart.html"><i class="fa-solid fa-cart-shopping"></i><span>Giỏ hàng</span></a>
+        </nav>
+    </header>
+
+    <div class="category-page-container">
+        <!-- SIDEBAR LỌC -->
+        <aside class="filter-sidebar">
+            <div class="filter-group">
+                <h3>DANH MỤC</h3>
+                <ul class="cat-list" id="sideCatList">
+                    <!-- Tải động -->
+                </ul>
+            </div>
+
+            <div class="filter-group">
+                <h3>KHOẢNG GIÁ</h3>
+                <div class="price-filter">
+                    <input type="number" id="minPrice" placeholder="Từ (đ)">
+                    <input type="number" id="maxPrice" placeholder="Đến (đ)">
+                    <button class="btn-apply" onclick="applyFilter()">ÁP DỤNG</button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- NỘI DUNG CHÍNH -->
+        <main>
+            <div class="category-header">
+                <h2 id="categoryTitle" style="font-weight: 900; color: var(--primary);">Tất cả sản phẩm</h2>
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <span style="font-size: 14px; color: var(--text-muted);">Sắp xếp theo:</span>
+                    <select id="sortBy" onchange="loadCategoryBooks(1)" style="padding: 8px 15px; border-radius: 10px; border: 1.5px solid #e2e8f0; font-weight: 600;">
+                        <option value="newest">Mới nhất</option>
+                        <option value="price-asc">Giá thấp đến cao</option>
+                        <option value="price-desc">Giá cao đến thấp</option>
+                        <option value="best-seller">Bán chạy nhất</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="book-list" id="categoryBookList">
+                <!-- Sách sẽ load ở đây -->
+            </div>
+
+            <div id="pagination" class="pagination" style="display: flex; justify-content: center; gap: 10px; margin-top: 40px;"></div>
+        </main>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            loadSideCategories();
+            loadCategoryBooks(1);
+        });
+
+        async function loadSideCategories() {
+            const list = document.getElementById("sideCatList");
+            try {
+                const res = await apiFetch(getFullUrl(CONFIG.ENDPOINTS.CATEGORIES));
+                if (res.ok) {
+                    const result = await res.json();
+                    const cats = result.data || result || [];
+                    const currentId = new URLSearchParams(window.location.search).get("categoryId");
+                    
+                    let html = `<li><a href="category.html" class="${!currentId ? 'active' : ''}">Tất cả</a></li>`;
+                    html += cats.map(c => `
+                        <li><a href="category.html?categoryId=${c.id}" class="${currentId == c.id ? 'active' : ''}">${c.name}</a></li>
+                    `).join("");
+                    list.innerHTML = html;
+
+                    if (currentId) {
+                        const activeCat = cats.find(c => c.id == currentId);
+                        if (activeCat) document.getElementById("categoryTitle").innerText = activeCat.name;
+                    }
+                }
+            } catch (e) {
+                console.error("Lỗi tải danh mục:", e);
+            }
+        }
+
+        async function loadCategoryBooks(page = 1) {
+            const list = document.getElementById("categoryBookList");
+            const params = new URLSearchParams(window.location.search);
+            const categoryId = params.get("categoryId") || "";
+            const search = params.get("search") || "";
+            const sortBy = document.getElementById("sortBy").value;
+            const minPrice = document.getElementById("minPrice").value;
+            const maxPrice = document.getElementById("maxPrice").value;
+
+            list.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">Đang tải...</p>';
+
+            let url = CONFIG.ENDPOINTS.BOOKS + `?page=${page}&limit=10&sortBy=${sortBy}`;
+            if (categoryId) url += `&categoryId=${categoryId}`;
+            if (search) url += `&search=${search}`;
+            if (minPrice) url += `&minPrice=${minPrice}`;
+            if (maxPrice) url += `&maxPrice=${maxPrice}`;
+
+            try {
+                const res = await apiFetch(getFullUrl(url));
+                if (res.ok) {
+                    const result = await res.json();
+                    const books = result.data || [];
+                    list.innerHTML = books.map(b => renderBookCard(b)).join("");
+                    renderPagination(result.pagination, "loadCategoryBooks");
+                }
+            } catch (e) {}
+        }
+
+        function applyFilter() {
+            loadCategoryBooks(1);
+        }
+    </script>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-column">
+                <h4><i class="fa-solid fa-book-bookmark"></i> BookStore</h4>
+                <p>Nơi khơi nguồn tri thức và đam mê. Chúng tôi cam kết mang đến những đầu sách chất lượng cao nhất với
+                    giá thành tốt nhất thị trường.</p>
+                <div class="footer-social">
+                    <a href="#"><i class="fa-brands fa-facebook"></i></a>
+                    <a href="#"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="#"><i class="fa-brands fa-youtube"></i></a>
+                    <a href="#"><i class="fa-brands fa-tiktok"></i></a>
+                </div>
+            </div>
+
+            <div class="footer-column">
+                <h4>Danh mục nổi bật</h4>
+                <ul>
+                    <li><a href="category.html?categoryId=8">Sách Văn học</a></li>
+                    <li><a href="category.html?categoryId=6">Tiểu thuyết</a></li>
+                    <li><a href="category.html?categoryId=2">Kinh tế & Kinh doanh</a></li>
+                    <li><a href="category.html?categoryId=7">Truyện tranh</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-column">
+                <h4>Chính sách</h4>
+                <ul>
+                    <li><a href="#">Chính sách đổi trả</a></li>
+                    <li><a href="#">Chính sách bảo mật</a></li>
+                    <li><a href="#">Vận chuyển & Giao nhận</a></li>
+                    <li><a href="#">Hình thức thanh toán</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-column">
+                <h4>Kết nối</h4>
+                <ul>
+                    <li><i class="fa-solid fa-location-dot"></i> 123 Đường Sách, Quận 1, TP.HCM</li>
+                    <li><i class="fa-solid fa-phone"></i> Hotline: 1900 1234</li>
+                    <li><i class="fa-solid fa-envelope"></i> Email: info@bookstore.vn</li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            &copy; 2026 BookStore Project. Designed for a better reading experience.
+        </div>
+    </footer>
+</body>
+</html>

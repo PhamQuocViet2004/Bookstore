@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng ký tài khoản - BookStore</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f0f2f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .register-card {
+            background: white;
+            width: 850px;
+            min-height: 550px;
+            display: flex;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+        .register-left {
+            flex: 1.2;
+            padding: 40px 50px;
+            display: flex;
+            flex-direction: column;
+        }
+        .register-right {
+            flex: 0.8;
+            background: linear-gradient(135deg, #f0f7ff 0%, #e0efff 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: left;
+            padding: 40px;
+        }
+        .register-left h2 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #1a1a1a;
+        }
+        .register-left p.subtitle {
+            font-size: 15px;
+            color: #4a4a4a;
+            margin-bottom: 25px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px 0;
+            border: none;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .form-group input:focus {
+            border-bottom: 1px solid #2563eb;
+        }
+        .btn-register {
+            width: 100%;
+            padding: 14px;
+            background-color: #ff424e;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background 0.3s;
+        }
+        .btn-register:hover {
+            background-color: #d1303a;
+        }
+        .link-login {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #0b74e5;
+            text-decoration: none;
+            cursor: pointer;
+            display: inline-block;
+        }
+        .benefits-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 20px;
+        }
+        .benefits-list li {
+            font-size: 14px;
+            color: #0b74e5;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+        }
+        .benefits-list li i {
+            font-size: 18px;
+        }
+        .logo-box img {
+            width: 160px;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="register-card">
+    <!-- LEFT SIDE: FORM -->
+    <div class="register-left">
+        <h2>Tạo tài khoản mới</h2>
+        <p class="subtitle">Chào mừng bạn gia nhập BookStore</p>
+
+        <form id="registerForm">
+            <div class="form-group">
+                <input type="text" id="fullName" placeholder="Họ và tên" required>
+            </div>
+            <div class="form-group">
+                <input type="text" id="phone" placeholder="Số điện thoại" required>
+            </div>
+            <div class="form-group">
+                <input type="email" id="email" placeholder="Địa chỉ Email" required>
+            </div>
+            <div class="form-group">
+                <input type="password" id="password" placeholder="Mật khẩu" required>
+            </div>
+            <div class="form-group">
+                <input type="password" id="confirmPassword" placeholder="Xác nhận mật khẩu" required>
+            </div>
+            <button type="submit" class="btn-register">Đăng ký ngay</button>
+        </form>
+
+        <a href="login.html" class="link-login">Bạn đã có tài khoản? Đăng nhập ngay</a>
+    </div>
+
+    <!-- RIGHT SIDE: BENEFITS & LOGO -->
+    <div class="register-right">
+        <div class="logo-box">
+            <img src="image/logo/logo.png" alt="BookStore Logo">
+        </div>
+        <h4 style="color: #0b74e5; margin-bottom: 15px; font-size: 18px;">Quyền lợi thành viên</h4>
+        <ul class="benefits-list">
+            <li><i class="fa-solid fa-circle-check"></i> Tích điểm đổi voucher giảm giá</li>
+            <li><i class="fa-solid fa-circle-check"></i> Theo dõi trạng thái đơn hàng 24/7</li>
+            <li><i class="fa-solid fa-circle-check"></i> Lưu danh sách sách yêu thích</li>
+            <li><i class="fa-solid fa-circle-check"></i> Nhận thông báo sách mới nhất</li>
+        </ul>
+    </div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/register.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đặt hàng thành công - BookStore</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        .success-container {
+            max-width: 600px;
+            margin: 80px auto;
+            text-align: center;
+            background: white;
+            padding: 50px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.05);
+        }
+        .success-icon {
+            font-size: 80px;
+            color: #4caf50;
+            margin-bottom: 20px;
+        }
+        .success-container h2 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        .order-id {
+            background: #f1f8e9;
+            color: #2e7d32;
+            padding: 10px 20px;
+            border-radius: 50px;
+            display: inline-block;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .success-btns {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        .btn-home {
+            background: #1976d2;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .btn-view-orders {
+            background: #f5f5f5;
+            color: #333;
+            padding: 12px 25px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header class="header">
+    <div class="logo" onclick="location.href='index.html'" style="cursor:pointer">
+        <i class="fa-solid fa-book"></i>
+        <span>BookStore</span>
+    </div>
+    <nav class="nav">
+        <a href="index.html"><i class="fa-solid fa-house"></i> Trang chủ</a>
+        <a href="cart.html"><i class="fa-solid fa-cart-shopping"></i> Giỏ hàng</a>
+    </nav>
+</header>
+
+<main class="success-container">
+    <div class="success-icon">
+        <i class="fa-solid fa-circle-check"></i>
+    </div>
+    <h2>ĐẶT HÀNG THÀNH CÔNG!</h2>
+    <p>Cảm ơn bạn đã tin tưởng chọn BookStore. Đơn hàng của bạn đang được xử lý.</p>
+    <div class="order-id">Mã đơn hàng: <span id="displayOrderId">#123456</span></div>
+    
+    <div class="success-btns">
+        <a href="index.html" class="btn-home">Tiếp tục mua sắm</a>
+        <a href="my-orders.html" class="btn-view-orders">Xem đơn hàng</a>
+    </div>
+</main>
+
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const orderId = params.get("orderId");
+    if (orderId) {
+        document.getElementById("displayOrderId").innerText = "#" + orderId;
+    }
+</script>
+
+</body>
+</html>

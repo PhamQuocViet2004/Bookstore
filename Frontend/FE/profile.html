@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tài khoản cá nhân - BookStore</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/profile.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header class="header">
+    <div class="logo" onclick="location.href='index.html'">
+        <i class="fa-solid fa-book-open-reader"></i>
+        <span>BookStore</span>
+    </div>
+    <div class="search">
+        <input type="text" id="searchInput" placeholder="Tìm kiếm tựa sách, tác giả...">
+        <button onclick="search()"><i class="fa-solid fa-magnifying-glass"></i> Tìm</button>
+        <div id="suggestBox" class="suggest-box"></div>
+    </div>
+    <nav class="nav">
+        <a href="index.html"><i class="fa-solid fa-house"></i><span>Trang chủ</span></a>
+        <a href="cart.html"><i class="fa-solid fa-cart-shopping"></i><span>Giỏ hàng</span></a>
+        <a href="admin-books.html" id="admin-nav-link" class="hidden"><i class="fa-solid fa-gauge-high"></i><span>Quản trị</span></a>
+        <div class="user-menu" id="userMenu">
+            <a href="javascript:void(0)" id="auth-link"><i class="fa-solid fa-circle-user"></i><span>Tài khoản</span></a>
+            <div class="user-dropdown" id="userDropdown">
+                <a href="profile.html" class="active"><i class="fa-solid fa-user-gear"></i> Hồ sơ cá nhân</a>
+                <a href="my-orders.html"><i class="fa-solid fa-box-archive"></i> Đơn hàng của tôi</a>
+                <a href="profile.html#wishlist"><i class="fa-solid fa-heart"></i> Danh sách yêu thích</a>
+                <a href="admin-books.html" id="admin-link-dropdown" class="hidden"><i class="fa-solid fa-gauge-high"></i> Trang quản trị</a>
+                <hr style="margin: 8px 0; border-color: #f1f5f9;">
+                <a href="#" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Đăng xuất</a>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<main class="account-container">
+    <aside class="account-sidebar">
+        <div class="user-brief">
+            <div class="avatar-wrapper" onclick="document.getElementById('avatar-input').click()">
+                <img src="https://ui-avatars.com/api/?name=User&background=random" alt="Avatar" id="sidebar-avatar">
+                <div class="avatar-overlay">
+                    <i class="fa-solid fa-camera"></i>
+                </div>
+                <input type="file" id="avatar-input" accept="image/*" hidden onchange="handleAvatarChange(event)">
+            </div>
+            <div class="user-brief-info">
+                <h4 id="sidebar-name">Khách hàng</h4>
+                <p id="sidebar-email">user@example.com</p>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="javascript:void(0)" class="active" onclick="switchTab('profile')"><i class="fa-solid fa-user"></i> Thông tin cá nhân</a>
+            <a href="javascript:void(0)" onclick="switchTab('orders')"><i class="fa-solid fa-box-archive"></i> Đơn hàng của tôi</a>
+            <a href="javascript:void(0)" onclick="switchTab('address')"><i class="fa-solid fa-map-location-dot"></i> Sổ địa chỉ</a>
+            <a href="javascript:void(0)" onclick="switchTab('wishlist')"><i class="fa-solid fa-heart"></i> Danh sách yêu thích</a>
+            <a href="javascript:void(0)" onclick="switchTab('security')"><i class="fa-solid fa-shield-halved"></i> Đổi mật khẩu</a>
+            <hr>
+            <a href="#" onclick="logout()" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> Đăng xuất</a>
+        </nav>
+    </aside>
+
+    <section class="account-content">
+        <!-- SECTION: PROFILE INFO -->
+        <div id="section-profile" class="tab-content active">
+            <div class="section-header">
+                <h2>Thông tin cá nhân</h2>
+                <p>Quản lý thông tin hồ sơ để bảo mật tài khoản</p>
+            </div>
+            <form id="profileForm" class="premium-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Họ và tên</label>
+                        <input type="text" id="profile-name" placeholder="Nhập họ tên đầy đủ">
+                    </div>
+                    <div class="form-group">
+                        <label>Địa chỉ Email</label>
+                        <input type="email" id="profile-email" disabled style="background: #f8fafc; cursor: not-allowed;">
+                    </div>
+                    <div class="form-group">
+                        <label>Số điện thoại</label>
+                        <input type="text" id="profile-phone" placeholder="Nhập số điện thoại">
+                    </div>
+                    <div class="form-group">
+                        <label>Ngày sinh</label>
+                        <input type="date" id="profile-dob">
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">Lưu thay đổi</button>
+            </form>
+        </div>
+
+        <!-- SECTION: ADDRESS BOOK -->
+        <div id="section-address" class="tab-content">
+            <div class="section-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h2>Sổ địa chỉ</h2>
+                    <p>Quản lý các địa chỉ nhận hàng của bạn</p>
+                </div>
+                <button class="btn-primary" onclick="showAddAddressModal()">+ Thêm địa chỉ mới</button>
+            </div>
+            <div id="address-list" class="address-grid">
+                <!-- Address cards injected here -->
+            </div>
+        </div>
+
+        <!-- SECTION: WISHLIST -->
+        <div id="section-wishlist" class="tab-content">
+            <div class="section-header">
+                <h2>Danh sách yêu thích</h2>
+                <p>Những cuốn sách bạn đã lưu để mua sau</p>
+            </div>
+            <div id="wishlist-list" class="book-list">
+                <!-- Wishlist books injected here -->
+            </div>
+        </div>
+
+        <!-- SECTION: SECURITY -->
+        <div id="section-security" class="tab-content">
+            <div class="section-header">
+                <h2>Đổi mật khẩu</h2>
+                <p>Để bảo mật tài khoản, vui lòng không chia sẻ mật khẩu cho người khác</p>
+            </div>
+            <form id="passwordForm" class="premium-form" style="max-width: 500px;">
+                <div class="form-group">
+                    <label>Mật khẩu hiện tại</label>
+                    <input type="password" id="old-pass" placeholder="********">
+                </div>
+                <div class="form-group">
+                    <label>Mật khẩu mới</label>
+                    <input type="password" id="new-pass" placeholder="Mật khẩu mới">
+                </div>
+                <div class="form-group">
+                    <label>Xác nhận mật khẩu mới</label>
+                    <input type="password" id="confirm-new-pass" placeholder="Xác nhận mật khẩu mới">
+                </div>
+                <button type="submit" class="btn-primary">Cập nhật mật khẩu</button>
+            </form>
+        </div>
+    </section>
+</main>
+
+<!-- MODAL ADD ADDRESS -->
+<div id="addressModal" class="overlay">
+    <div class="modal">
+        <div class="modal-header">
+            <h3>Thêm địa chỉ mới</h3>
+            <button class="btn-close" onclick="closeModal('addressModal')">&times;</button>
+        </div>
+        <form id="addressForm" class="premium-form">
+            <div class="form-group">
+                <label>Họ tên người nhận</label>
+                <input type="text" id="addr-name" required>
+            </div>
+            <div class="form-group">
+                <label>Số điện thoại</label>
+                <input type="text" id="addr-phone" required>
+            </div>
+            <div class="form-group">
+                <label>Địa chỉ chi tiết (Số nhà, đường...)</label>
+                <input type="text" id="addr-detail" required>
+            </div>
+            <div class="form-row" style="display:flex; gap:15px;">
+                <div class="form-group" style="flex:1">
+                    <label>Tỉnh/Thành phố</label>
+                    <input type="text" id="addr-city" required>
+                </div>
+                <div class="form-group" style="flex:1">
+                    <label>Quận/Huyện</label>
+                    <input type="text" id="addr-district" required>
+                </div>
+            </div>
+            <div style="margin-top: 15px;">
+                <input type="checkbox" id="addr-default">
+                <label for="addr-default" style="font-size: 13px; font-weight: 600;">Đặt làm địa chỉ mặc định</label>
+            </div>
+            <button type="submit" class="btn-primary" style="margin-top: 25px; width: 100%;">Lưu địa chỉ</button>
+        </form>
+    </div>
+</div>
+
+<footer class="footer">
+    <div class="footer-content">
+        <div class="footer-column">
+            <h4><i class="fa-solid fa-book-bookmark"></i> BookStore</h4>
+            <p>Nơi khơi nguồn tri thức và đam mê. Chúng tôi cam kết mang đến những đầu sách chất lượng cao nhất với
+                giá thành tốt nhất thị trường.</p>
+            <div class="footer-social">
+                <a href="#"><i class="fa-brands fa-facebook"></i></a>
+                <a href="#"><i class="fa-brands fa-instagram"></i></a>
+                <a href="#"><i class="fa-brands fa-youtube"></i></a>
+                <a href="#"><i class="fa-brands fa-tiktok"></i></a>
+            </div>
+        </div>
+
+        <div class="footer-column">
+            <h4>Danh mục nổi bật</h4>
+            <ul>
+                <li><a href="category.html?categoryId=8">Sách Văn học</a></li>
+                <li><a href="category.html?categoryId=6">Tiểu thuyết</a></li>
+                <li><a href="category.html?categoryId=2">Kinh tế & Kinh doanh</a></li>
+                <li><a href="category.html?categoryId=7">Truyện tranh</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-column">
+            <h4>Chính sách</h4>
+            <ul>
+                <li><a href="#">Chính sách đổi trả</a></li>
+                <li><a href="#">Chính sách bảo mật</a></li>
+                <li><a href="#">Vận chuyển & Giao nhận</a></li>
+                <li><a href="#">Hình thức thanh toán</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-column">
+            <h4>Kết nối</h4>
+            <ul>
+                <li><i class="fa-solid fa-location-dot"></i> 123 Đường Sách, Quận 1, TP.HCM</li>
+                <li><i class="fa-solid fa-phone"></i> Hotline: 1900 1234</li>
+                <li><i class="fa-solid fa-envelope"></i> Email: info@bookstore.vn</li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        &copy; 2026 BookStore Project. Designed for a better reading experience.
+    </div>
+</footer>
+
+<script src="js/config.js"></script>
+<script src="js/main.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/profile.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - BookStore Control Panel</title>
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <div class="admin-wrapper">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>BOOKSTORE</h2>
+                <p style="font-size: 11px; opacity: 0.6; margin-top: 5px;">HỆ THỐNG QUẢN TRỊ</p>
+            </div>
+            <ul>
+                <li class="active" onclick="showSection('dashboardSection'); setActive(this)">
+                    <i class="fa-solid fa-gauge-high"></i>
+                    <span>Tổng quan</span>
+                </li>
+                <li onclick="showSection('booksSection'); setActive(this)">
+                    <i class="fa-solid fa-book"></i>
+                    <span>Quản lý Sách</span>
+                </li>
+                <li onclick="showSection('orderSection'); setActive(this)">
+                    <i class="fa-solid fa-file-invoice-dollar"></i>
+                    <span>Đơn hàng</span>
+                    <span class="chat-notif-dot" id="adminOrderDot" style="display: none;"></span>
+                </li>
+                <li onclick="showSection('usersSection'); setActive(this)">
+                    <i class="fa-solid fa-users"></i>
+                    <span>Khách hàng</span>
+                </li>
+                <li onclick="showSection('categorySection'); setActive(this)">
+                    <i class="fa-solid fa-layer-group"></i>
+                    <span>Danh mục</span>
+                </li>
+                <li onclick="showSection('marketingSection'); setActive(this)">
+                    <i class="fa-solid fa-bullhorn"></i>
+                    <span>Marketing</span>
+                </li>
+                <li onclick="showSection('chatSection'); setActive(this)">
+                    <i class="fa-solid fa-comment-dots"></i>
+                    <span>Chat với khách</span>
+                    <span class="chat-notif-dot" id="adminChatDot" style="display: none;"></span>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <!-- TOP HEADER -->
+            <header class="top-header">
+                <div class="page-title">
+                    <span id="currentPageTitle">Bảng điều khiển</span>
+                </div>
+                <div class="top-actions">
+                    <!-- Notification Bell -->
+                    <div class="notification-wrapper" id="notifWrapper">
+                        <div class="notif-bell" onclick="toggleNotifDropdown()">
+                            <i class="fa-solid fa-bell"></i>
+                            <span class="notif-count" id="notifCount" style="display: none;">0</span>
+                        </div>
+                        <div class="notif-dropdown" id="notifDropdown">
+                            <div class="notif-header">
+                                <span>Thông báo</span>
+                                <button onclick="markAllNotifAsRead()">Đánh dấu đã đọc</button>
+                            </div>
+                            <div class="notif-list" id="notifList">
+                                <p style="padding: 15px; text-align: center; color: #64748b;">Đang tải thông báo...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="role-badge">
+                        <i class="fa-solid fa-user-shield"></i>
+                        <span id="adminName">Admin System</span>
+                    </div>
+                    <a href="index.html" class="btn-home">
+                        <i class="fa-solid fa-house"></i>
+                        <span>Về trang chủ</span>
+                    </a>
+                </div>
+            </header>
+
+            <div class="container">
+                <!-- ======================= -->
+                <!-- SECTION: DASHBOARD -->
+                <!-- ======================= -->
+                <section id="dashboardSection">
+                    <div class="stat-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon revenue"><i class="fa-solid fa-coins"></i></div>
+                            <div class="stat-info">
+                                <h3>Doanh thu tháng</h3>
+                                <p id="totalRevenue">0đ</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon orders"><i class="fa-solid fa-cart-shopping"></i></div>
+                            <div class="stat-info">
+                                <h3>Đơn hàng mới</h3>
+                                <p id="newOrdersCount">0</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon users"><i class="fa-solid fa-user-plus"></i></div>
+                            <div class="stat-info">
+                                <h3>Khách hàng mới</h3>
+                                <p id="newUsersCount">0</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon books"><i class="fa-solid fa-book-open"></i></div>
+                            <div class="stat-info">
+                                <h3>Sách sắp hết</h3>
+                                <p id="lowStockCount">0</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 2fr 1.2fr; gap: 20px;">
+                        <div class="section-card">
+                            <div class="section-header"><h2>Biểu đồ doanh thu (7 ngày qua)</h2></div>
+                            <div style="height: 300px; position: relative;">
+                                <canvas id="revenueChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="section-card">
+                            <div class="section-header"><h2>Sách bán chạy</h2></div>
+                            <div id="topSellingBooks">
+                                <!-- List top selling -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- New Row for Pie Chart -->
+                    <div style="display: grid; grid-template-columns: 1fr; margin-top: 20px;">
+                        <div class="section-card">
+                            <div class="section-header"><h2>Tỷ lệ doanh số theo danh mục</h2></div>
+                            <div style="height: 400px; position: relative; display: flex; justify-content: center; padding: 20px;">
+                                <canvas id="categoryPieChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ======================= -->
+                <!-- SECTION: BOOKS MANAGEMENT -->
+                <!-- ======================= -->
+                <section id="booksSection" class="hidden">
+                    <div class="section-card">
+                        <div class="section-header"><h2>Thêm / Chỉnh sửa sách</h2></div>
+                        <form id="bookForm" class="admin-form">
+                            <input type="hidden" id="bookId">
+                            <div class="form-group">
+                                <label>Tên sách</label>
+                                <input type="text" id="title" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Tác giả</label>
+                                <input type="text" id="author" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Giá bán (đ)</label>
+                                <input type="number" id="price" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Giảm giá (%)</label>
+                                <input type="number" id="discount" value="0">
+                            </div>
+                            <div class="form-group">
+                                <label>Số lượng kho</label>
+                                <input type="number" id="stock" value="0">
+                            </div>
+                            <div class="form-group">
+                                <label>Danh mục</label>
+                                <select id="category" required></select>
+                            </div>
+                            <div class="form-group full-width">
+                                <label>Ảnh sách (URL)</label>
+                                <input type="text" id="image">
+                            </div>
+                            <div class="form-group full-width">
+                                <label>Mô tả chi tiết</label>
+                                <textarea id="detail" rows="3"></textarea>
+                            </div>
+                            <button type="submit" class="btn-submit">LƯU DỮ LIỆU</button>
+                        </form>
+                    </div>
+
+                    <div class="section-card">
+                        <div class="section-header"><h2>Danh sách sách trong kho</h2></div>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Ảnh</th>
+                                        <th>Tên sách</th>
+                                        <th>Tác giả</th>
+                                        <th>Giá</th>
+                                        <th>Kho</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bookTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ======================= -->
+                <!-- SECTION: ORDER MANAGEMENT -->
+                <!-- ======================= -->
+                <section id="orderSection" class="hidden">
+                    <div class="section-card">
+                        <div class="section-header"><h2>Danh sách đơn hàng</h2></div>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Mã đơn</th>
+                                        <th>Khách hàng</th>
+                                        <th>Ngày đặt</th>
+                                        <th>Tổng tiền</th>
+                                        <th>Trạng thái</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="orderTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- ======================= -->
+                <!-- SECTION: USER MANAGEMENT -->
+                <!-- ======================= -->
+                <section id="usersSection" class="hidden">
+                    <div class="section-card">
+                        <div class="section-header"><h2>Quản lý khách hàng</h2></div>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Tên khách hàng</th>
+                                        <th>Email / SĐT</th>
+                                        <th>Vai trò</th>
+                                        <th>Trạng thái</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="userTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ======================= -->
+                <!-- SECTION: CATEGORY MANAGEMENT -->
+                <!-- ======================= -->
+                <section id="categorySection" class="hidden">
+                    <div class="section-card">
+                        <div class="section-header"><h2>Quản lý danh mục</h2></div>
+                        <div style="display: flex; gap: 15px; margin-bottom: 25px;">
+                            <input type="text" id="newCategoryName" placeholder="Tên danh mục mới..." style="flex:1; padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
+                            <button class="btn-primary" style="padding: 0 30px;" onclick="addCategory()">THÊM</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Tên danh mục</th>
+                                        <th>Số lượng sách</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="categoryTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- ======================= -->
+                <!-- SECTION: MARKETING (VOUCHERS) -->
+                <!-- ======================= -->
+                <section id="marketingSection" class="hidden">
+                    <div class="section-card">
+                        <div class="section-header"><h2>Tạo mã giảm giá mới</h2></div>
+                        <form id="voucherForm" class="admin-form">
+                            <div class="form-group">
+                                <label>Mã Voucher</label>
+                                <input type="text" id="vCode" placeholder="VD: GIAMGIA10" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Loại giảm giá</label>
+                                <select id="vType">
+                                    <option value="percent">Phần trăm (%)</option>
+                                    <option value="fixed">Số tiền cố định (đ)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Giá trị giảm</label>
+                                <input type="number" id="vValue" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Đơn tối thiểu (đ)</label>
+                                <input type="number" id="vMinOrder" value="0">
+                            </div>
+                            <div class="form-group">
+                                <label>Lượt sử dụng</label>
+                                <input type="number" id="vLimit" value="100">
+                            </div>
+                            <div class="form-group">
+                                <label>Ngày hết hạn</label>
+                                <input type="date" id="vEndDate">
+                            </div>
+                            <button type="submit" class="btn-submit">TẠO VOUCHER</button>
+                        </form>
+                    </div>
+
+                    <div class="section-card">
+                        <div class="section-header"><h2>Danh sách Voucher hiện có</h2></div>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Mã</th>
+                                        <th>Loại</th>
+                                        <th>Giá trị</th>
+                                        <th>Đơn tối thiểu</th>
+                                        <th>Đã dùng</th>
+                                        <th>Hết hạn</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="voucherTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ======================= -->
+                <!-- SECTION: CHAT MANAGEMENT -->
+                <!-- ======================= -->
+                <section id="chatSection" class="hidden">
+                    <div class="chat-admin-container">
+                        <div class="chat-sidebar">
+                            <div class="chat-sidebar-header">
+                                <h3>Hội thoại</h3>
+                            </div>
+                            <div class="chat-partner-list" id="adminChatPartnerList">
+                                <p style="padding:20px; text-align:center; color:#64748b; font-size:13px;">Đang tải danh sách...</p>
+                            </div>
+                        </div>
+                        <div class="chat-main">
+                            <div class="chat-main-header" id="adminChatHeader">
+                                <div style="display:flex; align-items:center; gap:10px;">
+                                    <div class="chat-avatar-placeholder"><i class="fa-solid fa-user"></i></div>
+                                    <div>
+                                        <div class="chat-partner-name" id="selectedPartnerName">Chọn một khách hàng</div>
+                                        <div class="chat-partner-status">Chọn cuộc hội thoại từ danh sách bên trái</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="chat-messages-area" id="adminChatMessages">
+                                <div class="chat-empty-state">
+                                    <i class="fa-solid fa-comments"></i>
+                                    <p>Chọn một khách hàng để bắt đầu vấn đáp và tư vấn</p>
+                                </div>
+                            </div>
+                            <div class="chat-input-wrapper">
+                                <input type="text" id="adminChatInput" placeholder="Nhập câu trả lời cho khách hàng..." disabled>
+                                <button id="adminChatSend" disabled><i class="fa-solid fa-paper-plane"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="http://localhost:3001/socket.io/socket.io.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/admin.js"></script>
+    <script src="js/admin-chat.js"></script>
+    <script>
+        function setActive(el) {
+            document.querySelectorAll('.sidebar li').forEach(li => li.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById('currentPageTitle').innerText = el.querySelector('span').innerText;
+        }
+        function showSection(id) {
+            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

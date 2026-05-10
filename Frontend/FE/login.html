@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập - BookStore</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f0f2f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .login-card {
+            background: white;
+            width: 800px;
+            height: 480px;
+            display: flex;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+        .login-left {
+            flex: 1.2;
+            padding: 40px 50px;
+            display: flex;
+            flex-direction: column;
+        }
+        .login-right {
+            flex: 0.8;
+            background: linear-gradient(135deg, #f0f7ff 0%, #e0efff 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 40px;
+        }
+        .login-left h2 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #1a1a1a;
+        }
+        .login-left p.subtitle {
+            font-size: 15px;
+            color: #4a4a4a;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px 0;
+            border: none;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .form-group input:focus {
+            border-bottom: 1px solid #2563eb;
+        }
+        .btn-continue {
+            width: 100%;
+            padding: 14px;
+            background-color: #ff424e;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background 0.3s;
+        }
+        .btn-continue:hover {
+            background-color: #d1303a;
+        }
+        .link-create {
+            margin-top: 25px;
+            font-size: 14px;
+            color: #0b74e5;
+            text-decoration: none;
+            cursor: pointer;
+            display: inline-block;
+        }
+        .logo-box img {
+            width: 200px;
+            margin-bottom: 20px;
+        }
+        .right-text h3 {
+            color: #0b74e5;
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+        .right-text p {
+            font-size: 14px;
+            color: #0b74e5;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="login-card">
+    <!-- LEFT SIDE: FORM -->
+    <div class="login-left">
+        <h2>Xin chào,</h2>
+        <p class="subtitle">Đăng nhập hoặc Tạo tài khoản</p>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <input type="text" id="email" placeholder="Số điện thoại / Email" required>
+            </div>
+            <div class="form-group" style="position: relative;">
+                <input type="password" id="password" placeholder="Mật khẩu" required>
+                <i class="fa-solid fa-eye-slash" id="togglePassword" style="position: absolute; right: 0; top: 12px; cursor: pointer; color: #666;"></i>
+            </div>
+            <button type="submit" class="btn-continue">Tiếp tục</button>
+        </form>
+
+        <a href="register.html" class="link-create">Tạo tài khoản</a>
+    </div>
+
+    <!-- RIGHT SIDE: LOGO & INFO -->
+    <div class="login-right">
+        <div class="logo-box">
+            <img src="image/logo/logo.png" alt="BookStore Logo">
+        </div>
+        <div class="right-text">
+            <h3>Mua sách online</h3>
+            <p>Ưu đãi mỗi ngày</p>
+        </div>
+    </div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/login.js"></script>
+
+</body>
+</html>
