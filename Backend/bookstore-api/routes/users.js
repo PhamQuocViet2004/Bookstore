@@ -20,9 +20,4 @@ router.get("/", roleMiddleware(['admin']), userController.getAllUsers);
 router.patch("/:id", roleMiddleware(['admin']), userController.updateUserPatch);
 router.delete("/:id", roleMiddleware(['admin']), userController.deleteUser);
 
-// Cloudinary upload
-router.post("/cloudinary", uploadCloud.single("image"), (req, res) => {
-    res.status(200).json({ url: req.file.path });
-});
-
 module.exports = router;
