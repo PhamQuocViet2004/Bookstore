@@ -34,28 +34,41 @@ const getStats = async (req, res) => {
     sevenDaysAgo.setDate(now.getDate() - 6);
     sevenDaysAgo.setHours(0, 0, 0, 0);
 
-    const dailyRevenue = await Order.findAll({
-      attributes: [
-        [sequelize.fn('DATE', sequelize.col('createdAt')), 'date'],
-        [sequelize.fn('SUM', sequelize.col('totalPrice')), 'total']
-      ],
+    // Lấy TẤT CẢ đơn hàng trong 7 ngày qua và tự group bằng JS để tránh lỗi Timezone/Alias của Sequelize
+    const recentOrders = await Order.findAll({
       where: {
-        status: { [Op.ne]: 'cancelled' }, // Không tính đơn đã hủy
+        status: { [Op.ne]: 'cancelled' },
         createdAt: { [Op.gte]: sevenDaysAgo }
       },
-      group: [sequelize.fn('DATE', sequelize.col('createdAt'))],
-      order: [[sequelize.fn('DATE', sequelize.col('createdAt')), 'ASC']],
       raw: true
     });
 
-    // Map dữ liệu về mảng 7 phần tử để vẽ biểu đồ
     const revenueChart = [];
     for (let i = 0; i < 7; i++) {
       const d = new Date(sevenDaysAgo);
       d.setDate(d.getDate() + i);
-      const dateStr = d.toISOString().split('T')[0];
-      const match = dailyRevenue.find(r => r.date === dateStr);
-      revenueChart.push(match ? parseInt(match.total) : 0);
+      
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      const dateStr = `${yyyy}-${mm}-${dd}`;
+      
+      // Tính tổng doanh thu của ngày này
+      let dailyTotal = 0;
+      recentOrders.forEach(order => {
+        // Parse order.createdAt về giờ local
+        const orderDate = new Date(order.createdAt);
+        const orderY = orderDate.getFullYear();
+        const orderM = String(orderDate.getMonth() + 1).padStart(2, '0');
+        const orderD = String(orderDate.getDate()).padStart(2, '0');
+        const orderDateStr = `${orderY}-${orderM}-${orderD}`;
+        
+        if (orderDateStr === dateStr) {
+          dailyTotal += parseInt(order.totalPrice || 0);
+        }
+      });
+      
+      revenueChart.push(dailyTotal);
     }
 
     // 6. Top Selling Books

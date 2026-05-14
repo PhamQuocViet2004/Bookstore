@@ -3,6 +3,7 @@
 
 # Ignore sensitive files
 **/.env
+**/config/config.json
 
 # Logs and temp files
 *.log

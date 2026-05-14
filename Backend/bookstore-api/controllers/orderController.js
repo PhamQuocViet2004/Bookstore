@@ -158,8 +158,8 @@ const createOrder = async (req, res) => {
 
   } catch (error) {
     if (transaction) await transaction.rollback();
-    console.error(error);
-    res.status(500).json({ message: "Lỗi hệ thống khi tạo đơn hàng." });
+    console.error("Order creation error:", error);
+    res.status(500).json({ message: "Lỗi hệ thống khi tạo đơn hàng.", error: error.message, stack: error.stack });
   }
 };
 

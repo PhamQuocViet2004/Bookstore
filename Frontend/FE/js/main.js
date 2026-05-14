@@ -397,8 +397,20 @@ async function loadNotifications() {
             if (unreadCount > 0) {
                 countEl.textContent = unreadCount;
                 countEl.style.display = "flex";
+                
+                // Hiển thị chấm đỏ ở nút Quản trị nếu có thông báo (đơn hàng mới, tin nhắn)
+                const userStr = localStorage.getItem('userInfo');
+                if (userStr) {
+                    const user = JSON.parse(userStr);
+                    if (user.role === 'admin' || user.role === 'librarian') {
+                        const adminBadge = document.getElementById("adminChatBadge");
+                        if (adminBadge) adminBadge.style.display = "block";
+                    }
+                }
             } else {
                 countEl.style.display = "none";
+                const adminBadge = document.getElementById("adminChatBadge");
+                if (adminBadge) adminBadge.style.display = "none";
             }
 
             if (notifications.length === 0) {
@@ -471,6 +483,12 @@ function initSocket() {
         });
 
         socket.on('receiveMessage', (msg) => {
+            // Hiện chấm đỏ ở nút Quản trị trên Header
+            const badge = document.getElementById("adminChatBadge");
+            if (badge) badge.style.display = "block";
+        });
+
+        socket.on('newOrder', (data) => {
             // Hiện chấm đỏ ở nút Quản trị trên Header
             const badge = document.getElementById("adminChatBadge");
             if (badge) badge.style.display = "block";
